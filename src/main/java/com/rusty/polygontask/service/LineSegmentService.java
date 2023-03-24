@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -37,53 +36,60 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            double[] xs = new double[]{p1.getX(), p2.getX(), p3.getX(), p4.getX()};
-            double[] ys = new double[]{p1.getY(), p2.getY(), p3.getY(), p4.getY()};
-            Arrays.sort(xs);
-            Arrays.sort(ys);
-            if (xAxisOverlapping(p1, p2, p3, p4) && yAxisOverlapping(p1, p2, p3, p4)) {
-                if (point.getX() > xs[1] && point.getX() < xs[2] && point.getX() > ys[1] && point.getY() < ys[2]) {
-                    point.setX(BigDecimal.valueOf(point.getX()).setScale(2, RoundingMode.HALF_UP).doubleValue());
-                    point.setY(BigDecimal.valueOf(point.getY()).setScale(2, RoundingMode.HALF_UP).doubleValue());
-                    return Optional.of(point);
-                }
+            if (isPointIncluded(p1, p2, point) && isPointIncluded(p3, p4, point)) {
+                return Optional.of(point);
             }
         }
         return Optional.empty();
     }
 
-    private boolean xAxisOverlapping(Point p1, Point p2, Point p3, Point p4) {
-        if (p3.getX() <= p4.getX()) {
-            return (p1.getX() >= p3.getX() && p1.getX() <= p4.getX()) || (p2.getX() >= p3.getX() && p2.getX() <= p4.getX());
-        } else {
-            return (p1.getX() >= p4.getX() && p1.getX() <= p3.getX()) || (p2.getX() >= p4.getX() && p2.getX() <= p3.getX());
-        }
-    }
-
-    private boolean yAxisOverlapping(Point p1, Point p2, Point p3, Point p4) {
-        if (p3.getY() <= p4.getY()) {
-            return (p1.getY() >= p3.getY() && p1.getY() <= p4.getY()) || (p2.getY() >= p3.getY() && p2.getY() <= p4.getY());
-        } else {
-            return (p1.getY() >= p4.getY() && p1.getY() <= p3.getY()) || (p2.getY() >= p4.getY() && p2.getY() <= p3.getY());
-        }
+    private boolean isPointIncluded(Point p1, Point p2, Point point) {
+        double distance1 = Math.sqrt(Math.pow(point.getX() - p1.getX(), 2) + Math.pow(point.getY() - p1.getY(), 2));
+        double distance2 = Math.sqrt(Math.pow(point.getX() - p2.getX(), 2) + Math.pow(point.getY() - p2.getY(), 2));
+        double segmentLen = Math.sqrt(Math.pow(p2.getX() - p1.getX(), 2) + Math.pow(p2.getY() - p1.getY(), 2));
+        BigDecimal d1 = BigDecimal.valueOf(distance1).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal d2 = BigDecimal.valueOf(distance2).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal sl = BigDecimal.valueOf(segmentLen).setScale(3, RoundingMode.HALF_UP);
+        return sl.compareTo(d1.add(d2)) == 0;
     }
 
     private Optional<Point> getLinesIntersectionPoint(Point p1, Point p2, Point p3, Point p4) {
-        double k1 = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
-        double k2 = (p4.getY() - p3.getY()) / (p4.getX() - p3.getX());
-        if (Double.compare(k1, k2) == 0) {
+        double k1;
+        double k2;
+        double b1;
+        double b2;
+        double x;
+        double y;
+
+        if (Double.compare(p2.getX(), p1.getX()) != 0 && Double.compare(p4.getX(), p3.getX()) != 0) {
+            k1 = getSlopeFactor(p1, p2);
+            k2 = getSlopeFactor(p3, p4);
+            b1 = p1.getY() - k1 * p1.getX();
+            b2 = p3.getY() - k2 * p3.getX();
+            x = (b2 - b1) / (k1 - k2);
+            y = k1 * x + b1;
+            if (Double.compare(Math.abs(k1), Math.abs(k2)) == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(new Point(x, y));
+        } else if (Double.compare(p2.getX(), p1.getX()) == 0 && Double.compare(p4.getX(), p3.getX()) != 0) {
+            k2 = getSlopeFactor(p3, p4);
+            b2 = p3.getY() - k2 * p3.getX();
+            x = p2.getX();
+            y = k2 * x + b2;
+            return Optional.of(new Point(x, y));
+        } else if (Double.compare(p2.getX(), p1.getX()) != 0 && Double.compare(p4.getX(), p3.getX()) == 0) {
+            k1 = getSlopeFactor(p1, p2);
+            b1 = p1.getY() - k1 * p1.getX();
+            x = p4.getX();
+            y = k1 * x + b1;
+            return Optional.of(new Point(x, y));
+        } else {
             return Optional.empty();
         }
-        double b1 = p1.getY() - k1 * p1.getX();
-        double b2 = p3.getY() - k2 * p3.getX();
-        double x = (b2 - b1) / (k1 - k2);
-        double y = k1 * x + b1;
-        
-        Point value = new Point(x, y);
-        value.setX(BigDecimal.valueOf(value.getX()).setScale(2, RoundingMode.HALF_UP).doubleValue());
-        value.setY(BigDecimal.valueOf(value.getY()).setScale(2, RoundingMode.HALF_UP).doubleValue());
-        System.out.println(value);
+    }
 
-        return Optional.of(value);
+    private double getSlopeFactor(Point first, Point second) {
+        return (second.getY() - first.getY()) / (second.getX() - first.getX());
     }
 }

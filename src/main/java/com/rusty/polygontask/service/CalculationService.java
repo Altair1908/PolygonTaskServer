@@ -19,6 +19,7 @@ public class CalculationService {
 
     public void calculate(Polygon polygon) {
 
+        // формула Гаусса
         List<Point> points = polygon.getPoints();
         double component = 0.0;
         for (int i = 0; i < points.size(); i++) {
