@@ -1,20 +1,19 @@
 package com.rusty.polygontask.controller;
 
 import com.rusty.polygontask.model.Polygon;
-import com.rusty.polygontask.service.CalculationService;
+import com.rusty.polygontask.service.PolygonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainController {
 
-    private final CalculationService calculationService;
+    private final PolygonService polygonService;
 
     @Autowired
-    public MainController(CalculationService calculationService) {
-        this.calculationService = calculationService;
+    public MainController(PolygonService polygonService) {
+        this.polygonService = polygonService;
     }
 
     @GetMapping("/test")
@@ -78,6 +77,6 @@ public class MainController {
         m.addPoint(6.0, 6.0);
         m.addPoint(6.0, 2.0);
 
-        calculationService.calculate2(r,h);
+//        polygonService.getPolygonSquare(r);
     }
 }

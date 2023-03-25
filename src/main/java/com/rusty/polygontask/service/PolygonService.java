@@ -4,7 +4,6 @@ import com.rusty.polygontask.enumeration.ContourDirection;
 import com.rusty.polygontask.model.Point;
 import com.rusty.polygontask.enumeration.PointPosition;
 import com.rusty.polygontask.model.Polygon;
-import com.rusty.polygontask.model.Triangle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +19,10 @@ import static com.rusty.polygontask.constant.MathConstants.pi;
 public class PolygonService {
 
     private LineSegmentService lineSegmentService;
-    private TriangleService triangleService;
 
     @Autowired
     public void setLineSegmentService(LineSegmentService lineSegmentService) {
         this.lineSegmentService = lineSegmentService;
-    }
-
-    @Autowired
-    public void setTriangleService(TriangleService triangleService) {
-        this.triangleService = triangleService;
     }
 
     private double getPolygonAnglesSum(Polygon polygon) {
@@ -61,59 +54,44 @@ public class PolygonService {
         }
     }
 
+    // Gauss's area formula
     public double getPolygonSquare(Polygon polygon) {
         List<Point> points = polygon.getPoints();
-        if (getPolygonContourDirection(polygon).equals(ContourDirection.counterClockwise)) {
-            Collections.reverse(points);
+        double component = 0.0;
+        for (int i = 0; i < points.size(); i++) {
+            int secondPointIndex = i == points.size() - 1 ? 0 : i + 1;
+            component += points.get(i).x() * points.get(secondPointIndex).y() -
+                    points.get(i).y() * points.get(secondPointIndex).x();
         }
-        double square = 0.0;
-        while (points.size() >= 3) {
-            Point p1 = points.get(0);
-            Point p2 = points.get(1);
-            Point p3 = points.get(2);
-            Triangle triangle = new Triangle(p1, p2, p3);
-            PointPosition pointPosition = lineSegmentService.getLineRelativePointPosition(p1, p2, p3);
-            if (pointPosition.equals(PointPosition.rightSide)) {
-                if (triangleService.isFullFilling(triangle, polygon)) {
-                    square += triangleService.getTriangleSquare(triangle);
-                    points.remove(p2);
-                } else {
-                    Collections.rotate(points, -1);
-                }
-            } else if (pointPosition.equals(PointPosition.belongs)) {
-                points.remove(p2);
-            } else if (pointPosition.equals(PointPosition.leftSide)) {
-                Collections.rotate(points, -1);
-            }
-        }
-        return square;
+        return 0.5 * Math.abs(component);
     }
 
-
-
-
-    public void doWork(Polygon polygon1, Polygon polygon2) {
-        // todo переворачивать
+    public void createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
         List<Point> points1 = polygon1.getPoints();
         List<Point> points2 = polygon2.getPoints();
-        Point first1;
-        Point second1;
-        Point first2;
-        Point second2;
+        if (getPolygonContourDirection(polygon1).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(points1);
+        }
+        if (getPolygonContourDirection(polygon2).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(points2);
+        }
+        Polygon dupPolygon1 = new Polygon(points1);
+        Polygon dupPolygon2 = new Polygon(points2);
         int secondPointIndex1;
         int secondPointIndex2;
+        List<Point> edgeIntersectionPoints = new ArrayList<>();
         for (int i = 0; i < points1.size(); i++) {
             secondPointIndex1 = i == points1.size() - 1 ? 0 : i + 1;
-            first1 = points1.get(i);
-            second1 = points1.get(secondPointIndex1);
+            edgeIntersectionPoints.clear();
             for (int t = 0; t < points2.size(); t++) {
                 secondPointIndex2 = t == points2.size() - 1 ? 0 : t + 1;
-                first2 = points2.get(t);
-                second2 = points2.get(secondPointIndex2);
-                Optional<Point> intersectionPointOpt =
-                        lineSegmentService.getSegmentsIntersectionPoint(first1, second1, first2, second2);
-                intersectionPointOpt.ifPresent(point -> System.out.println(intersectionPointOpt.get()));
+                Optional<Point> intersectionPointOpt = lineSegmentService.getSegmentsIntersectionPoint(
+                        points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
+                intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
+
+
+
         }
     }
 }
