@@ -2,7 +2,24 @@ package com.rusty.polygontask.model;
 
 import java.util.Objects;
 
-public record Point(double x, double y) {
+public class Point {
+
+    public final double x;
+    public final double y;
+    private boolean isIntersectionPoint = false;
+
+    public Point(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public boolean isIntersectionPoint() {
+        return isIntersectionPoint;
+    }
+
+    public void setIntersectionPoint(boolean intersectionPoint) {
+        isIntersectionPoint = intersectionPoint;
+    }
 
     @Override
     public boolean equals(Object o) {

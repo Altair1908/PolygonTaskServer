@@ -60,8 +60,8 @@ public class PolygonService {
         double component = 0.0;
         for (int i = 0; i < points.size(); i++) {
             int secondPointIndex = i == points.size() - 1 ? 0 : i + 1;
-            component += points.get(i).x() * points.get(secondPointIndex).y() -
-                    points.get(i).y() * points.get(secondPointIndex).x();
+            component += points.get(i).x * points.get(secondPointIndex).y -
+                    points.get(i).y * points.get(secondPointIndex).x;
         }
         return 0.5 * Math.abs(component);
     }
@@ -90,7 +90,7 @@ public class PolygonService {
                 intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
 
-
+            System.out.println(edgeIntersectionPoints);
 
         }
     }

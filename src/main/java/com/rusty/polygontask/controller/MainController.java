@@ -77,6 +77,6 @@ public class MainController {
         m.addPoint(6.0, 6.0);
         m.addPoint(6.0, 2.0);
 
-//        polygonService.getPolygonSquare(r);
+        polygonService.createPolygonsWithIntersectionPoints(r, h);
     }
 }
