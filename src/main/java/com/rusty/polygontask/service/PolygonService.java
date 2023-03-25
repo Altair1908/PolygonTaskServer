@@ -8,18 +8,16 @@ import com.rusty.polygontask.model.Triangle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.rusty.polygontask.constant.MathConstants.delta;
+import static com.rusty.polygontask.constant.MathConstants.pi;
+
 @Service
 public class PolygonService {
-
-    private final double pi = 3.14159265359;
-    private final int roundingPlaces = 4;
 
     private LineSegmentService lineSegmentService;
     private TriangleService triangleService;
@@ -54,11 +52,9 @@ public class PolygonService {
     }
 
     public ContourDirection getPolygonContourDirection(Polygon polygon) {
-        BigDecimal actualPolygonAnglesSum = BigDecimal.valueOf(getPolygonAnglesSum(polygon))
-                .setScale(roundingPlaces, RoundingMode.HALF_UP);
-        BigDecimal expectedPolygonAnglesSum = new BigDecimal(pi * (polygon.getPoints().size() - 2))
-                .setScale(roundingPlaces, RoundingMode.HALF_UP);
-        if (actualPolygonAnglesSum.compareTo(expectedPolygonAnglesSum) == 0) {
+        double actualPolygonAnglesSum = getPolygonAnglesSum(polygon);
+        double expectedPolygonAnglesSum = pi * (polygon.getPoints().size() - 2);
+        if (Math.abs(actualPolygonAnglesSum - expectedPolygonAnglesSum) < delta) {
             return ContourDirection.clockwise;
         } else {
             return ContourDirection.counterClockwise;

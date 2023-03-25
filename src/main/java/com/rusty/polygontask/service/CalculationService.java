@@ -31,7 +31,8 @@ public class CalculationService {
 
         double polygonSquare = polygonService.getPolygonSquare(polygon);
         System.out.println(polygonSquare);
-        System.out.println(Double.compare(s, polygonSquare));
+        System.out.println(s);
+
     }
 
     public void calculate2(Polygon polygon1, Polygon polygon2) {
