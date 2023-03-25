@@ -14,7 +14,6 @@ public class LineSegmentService {
     public double getClockwiseAngle(Point p1, Point p2, Point p3) {
         Point np2 = new Point(p2.getX() - p1.getX(), p2.getY() - p1.getY());
         Point np3 = new Point(p3.getX() - p2.getX(), p3.getY() - p2.getY());
-
         double numerator = np2.getX() * np3.getX() + np2.getY() * np3.getY();
         double pOneTwoVectorLength = Math.sqrt(Math.pow(np2.getX(), 2) + Math.pow(np2.getY(), 2));
         double pTwoThreeVectorLength = Math.sqrt(Math.pow(np3.getX(), 2) + Math.pow(np3.getY(), 2));
@@ -57,6 +56,7 @@ public class LineSegmentService {
         double b2;
         double x;
         double y;
+
         boolean isFirstLineVertical = Math.abs(p2.getX() - p1.getX()) < delta;
         boolean isSecondLineVertical = Math.abs(p4.getX() - p3.getX()) < delta;
         if (!isFirstLineVertical && !isSecondLineVertical) {

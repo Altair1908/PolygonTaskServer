@@ -58,6 +58,26 @@ public class MainController {
 
 
 
+        Polygon n = new Polygon();
+        n.addPoint(0.0, 0.0);
+        n.addPoint(2.0, 6.0);
+        n.addPoint(3.0, 1.0);
+        n.addPoint(4.0, 6.0);
+        n.addPoint(5.0, 1.0);
+        n.addPoint(6.0, 6.0);
+        n.addPoint(7.0, 1.0);
+        n.addPoint(7.0, 0.0);
+
+        Polygon m = new Polygon();
+        m.addPoint(7.0, 2.0);
+        m.addPoint(7.0, 7.0);
+        m.addPoint(2.0, 6.0);
+        m.addPoint(2.0, 1.0);
+        m.addPoint(4.0, 1.0);
+        m.addPoint(4.0, 6.0);
+        m.addPoint(6.0, 6.0);
+        m.addPoint(6.0, 2.0);
+
         calculationService.calculate2(r,h);
     }
 }
