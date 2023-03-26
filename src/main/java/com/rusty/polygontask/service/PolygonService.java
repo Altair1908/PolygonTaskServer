@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.rusty.polygontask.constant.MathConstants.delta;
@@ -18,11 +21,27 @@ import static com.rusty.polygontask.constant.MathConstants.pi;
 @Service
 public class PolygonService {
 
-    private LineSegmentService lineSegmentService;
+    private final LineSegmentService lineSegmentService;
 
     @Autowired
-    public void setLineSegmentService(LineSegmentService lineSegmentService) {
+    public PolygonService(LineSegmentService lineSegmentService) {
         this.lineSegmentService = lineSegmentService;
+    }
+
+    // Gauss's area formula
+    public double getPolygonSquare(Polygon polygon) {
+        List<Point> points = polygon.getPoints();
+        double component = 0.0;
+        for (int i = 0; i < points.size(); i++) {
+            int secondPointIndex = i == points.size() - 1 ? 0 : i + 1;
+            component += points.get(i).x * points.get(secondPointIndex).y -
+                    points.get(i).y * points.get(secondPointIndex).x;
+        }
+        return 0.5 * Math.abs(component);
+    }
+
+    public void calculateSquares(Polygon polygon1, Polygon polygon2) {
+        createPolygonsWithIntersectionPoints(polygon1, polygon2);
     }
 
     private double getPolygonAnglesSum(Polygon polygon) {
@@ -44,7 +63,7 @@ public class PolygonService {
         return sumAngle;
     }
 
-    public ContourDirection getPolygonContourDirection(Polygon polygon) {
+    private ContourDirection getContourDirection(Polygon polygon) {
         double actualPolygonAnglesSum = getPolygonAnglesSum(polygon);
         double expectedPolygonAnglesSum = pi * (polygon.getPoints().size() - 2);
         if (Math.abs(actualPolygonAnglesSum - expectedPolygonAnglesSum) < delta) {
@@ -54,27 +73,19 @@ public class PolygonService {
         }
     }
 
-    // Gauss's area formula
-    public double getPolygonSquare(Polygon polygon) {
-        List<Point> points = polygon.getPoints();
-        double component = 0.0;
-        for (int i = 0; i < points.size(); i++) {
-            int secondPointIndex = i == points.size() - 1 ? 0 : i + 1;
-            component += points.get(i).x * points.get(secondPointIndex).y -
-                    points.get(i).y * points.get(secondPointIndex).x;
+    private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
+        if (getContourDirection(polygon1).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(polygon1.getPoints());
         }
-        return 0.5 * Math.abs(component);
+        if (getContourDirection(polygon2).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(polygon2.getPoints());
+        }
     }
 
-    public void createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
+    private void createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
         List<Point> points1 = polygon1.getPoints();
         List<Point> points2 = polygon2.getPoints();
-        if (getPolygonContourDirection(polygon1).equals(ContourDirection.counterClockwise)) {
-            Collections.reverse(points1);
-        }
-        if (getPolygonContourDirection(polygon2).equals(ContourDirection.counterClockwise)) {
-            Collections.reverse(points2);
-        }
+        setClockwiseContourDirection(polygon1, polygon2);
         Polygon dupPolygon1 = new Polygon(points1);
         Polygon dupPolygon2 = new Polygon(points2);
         int secondPointIndex1;
@@ -89,10 +100,30 @@ public class PolygonService {
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
                 intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
-
-            System.out.println(edgeIntersectionPoints);
-
+            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
+            dupPolygon1.getPoints().addAll(dupPolygon1.getPoints().indexOf(points1.get(i)) + 1, sorted); // todo
         }
+//        for (Point point : dupPolygon1.getPoints()) {
+//            if (point.isIntersectionPoint()) {
+//                System.out.println("--> " + point);
+//            } else {
+//                System.out.println(point);
+//            }
+//        }
+    }
+
+    private List<Point> sortIntersectionPointsByBasePoint(List<Point> edgeIntersectionPoints, Point basePoint) {
+        Map<Double, Point> distances = new HashMap<>();
+        double distance;
+
+        for (Point point : edgeIntersectionPoints) {
+            distance = Math.sqrt(Math.pow(basePoint.x - point.x, 2) + Math.pow(basePoint.y - point.y, 2));
+            distances.put(distance, point);
+        }
+        return distances.entrySet().stream()
+                .sorted(Comparator.comparingDouble(Map.Entry::getKey))
+                .map(Map.Entry::getValue)
+                .toList();
     }
 }
 
