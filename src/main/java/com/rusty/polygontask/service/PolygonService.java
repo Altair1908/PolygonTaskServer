@@ -41,12 +41,32 @@ public class PolygonService {
     }
 
     public void calculateSquares(Polygon polygon1, Polygon polygon2) {
+        setClockwiseContourDirection(polygon1, polygon2);
         createPolygonsWithIntersectionPoints(polygon1, polygon2);
+
+//        System.out.println("----");
+//        for (Point point : polygon1.getPoints()) {
+//            System.out.println(point.getAngle());
+//        }
+//        System.out.println("----");
+//        for (Point point : polygon2.getPoints()) {
+//            System.out.println(point.getAngle());
+//        }
+    }
+
+    private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
+        if (getContourDirection(polygon1).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(polygon1.getPoints());
+        }
+        if (getContourDirection(polygon2).equals(ContourDirection.counterClockwise)) {
+            Collections.reverse(polygon2.getPoints());
+        }
     }
 
     private double getPolygonAnglesSum(Polygon polygon) {
-        List<Point> points = new ArrayList<>(polygon.getPoints());
+        List<Point> points = polygon.getPoints();
         double sumAngle = 0.0;
+        double increment;
         for (int i = 0; i < points.size(); i++) {
             Point p1 = points.get(0);
             Point p2 = points.get(1);
@@ -54,10 +74,12 @@ public class PolygonService {
             double angle = lineSegmentService.getClockwiseAngle(p1, p2, p3);
             PointPosition pointPosition = lineSegmentService.getLineRelativePointPosition(p1, p2, p3);
             if (pointPosition.equals(PointPosition.rightSide)) {
-                sumAngle += pi - angle;
+                increment = pi - angle;
             } else {
-                sumAngle += pi + angle;
+                increment = pi + angle;
             }
+            sumAngle += increment;
+            p2.setAngle(increment * 180 / pi);
             Collections.rotate(points, -1);
         }
         return sumAngle;
@@ -73,19 +95,9 @@ public class PolygonService {
         }
     }
 
-    private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
-        if (getContourDirection(polygon1).equals(ContourDirection.counterClockwise)) {
-            Collections.reverse(polygon1.getPoints());
-        }
-        if (getContourDirection(polygon2).equals(ContourDirection.counterClockwise)) {
-            Collections.reverse(polygon2.getPoints());
-        }
-    }
-
     private void createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
         List<Point> points1 = polygon1.getPoints();
         List<Point> points2 = polygon2.getPoints();
-        setClockwiseContourDirection(polygon1, polygon2);
         Polygon dupPolygon1 = new Polygon(points1);
         Polygon dupPolygon2 = new Polygon(points2);
         int secondPointIndex1;
@@ -98,10 +110,13 @@ public class PolygonService {
                 secondPointIndex2 = t == points2.size() - 1 ? 0 : t + 1;
                 Optional<Point> intersectionPointOpt = lineSegmentService.getSegmentsIntersectionPoint(
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
-                intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
+                intersectionPointOpt.ifPresent(point -> {
+//                    edgeIntersectionPoints::add
+                    System.out.println(point);
+                });
             }
-            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
-            dupPolygon1.getPoints().addAll(dupPolygon1.getPoints().indexOf(points1.get(i)) + 1, sorted); // todo
+//            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
+//            dupPolygon1.getPoints().addAll(dupPolygon1.getPoints().indexOf(points1.get(i)) + 1, sorted); // todo
         }
 //        for (Point point : dupPolygon1.getPoints()) {
 //            if (point.isIntersectionPoint()) {

@@ -77,6 +77,22 @@ public class MainController {
         m.addPoint(6.0, 6.0);
         m.addPoint(6.0, 2.0);
 
+
+
+        Polygon j = new Polygon();
+        j.addPoint(0.0, 0.0);
+        j.addPoint(0.0, 4.0);
+        j.addPoint(4.0, 4.0);
+        j.addPoint(4.0, 0.0);
+
+        Polygon k = new Polygon();
+        k.addPoint(6.0, 0.0);
+        k.addPoint(4.0, 2.0);
+        k.addPoint(6.0, 4.0);
+        k.addPoint(8.0, 2.0);
+
+
+
         polygonService.calculateSquares(n, m);
     }
 }

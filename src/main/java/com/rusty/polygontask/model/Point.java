@@ -7,6 +7,7 @@ public class Point {
     public final double x;
     public final double y;
     private boolean isIntersectionPoint = false;
+    private double angle;
 
     public Point(double x, double y) {
         this.x = x;
@@ -19,6 +20,14 @@ public class Point {
 
     public void setIntersectionPoint(boolean intersectionPoint) {
         isIntersectionPoint = intersectionPoint;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 
     @Override
