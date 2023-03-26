@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import static com.rusty.polygontask.constant.MathConstants.delta;
+import static com.rusty.polygontask.constant.MathConstants.pi;
 
 @Service
 public class LineSegmentService {
@@ -17,7 +18,13 @@ public class LineSegmentService {
         double numerator = np2.x * np3.x + np2.y * np3.y;
         double pOneTwoVectorLength = Math.sqrt(Math.pow(np2.x, 2) + Math.pow(np2.y, 2));
         double pTwoThreeVectorLength = Math.sqrt(Math.pow(np3.x, 2) + Math.pow(np3.y, 2));
-        return Math.acos(numerator / (pOneTwoVectorLength * pTwoThreeVectorLength));
+        double angle = Math.acos(numerator / (pOneTwoVectorLength * pTwoThreeVectorLength));
+        PointPosition pointPosition = getLineRelativePointPosition(p1, p2, p3);
+        if (pointPosition.equals(PointPosition.rightSide)) {
+            return pi - angle;
+        } else {
+            return pi + angle;
+        }
     }
 
     public PointPosition getLineRelativePointPosition(Point lineFirstPoint, Point lineSecondPoint, Point point) {
@@ -35,7 +42,7 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            if (isPointIncluded(p1, p2, point) && isPointIncluded(p3, p4, point)) {
+            if (isPointIncluded(p1, p2, point, p3, p4) && isPointIncluded(p3, p4, point, p1, p2)) {
                 point.setIntersectionPoint(true);
                 return Optional.of(point);
             }
@@ -43,10 +50,22 @@ public class LineSegmentService {
         return Optional.empty();
     }
 
-    private boolean isPointIncluded(Point p1, Point p2, Point point) {
+    private boolean isPointIncluded(Point p1, Point p2, Point point, Point crossCheck1, Point crossCheck2) {
         double distance1 = Math.sqrt(Math.pow(point.x - p1.x, 2) + Math.pow(point.y - p1.y, 2));
         double distance2 = Math.sqrt(Math.pow(point.x - p2.x, 2) + Math.pow(point.y - p2.y, 2));
         double segmentLen = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+
+        if (distance2 < delta) {
+            if (p2.getAngle() < getClockwiseAngle(p1, p2, crossCheck1)) {
+                return false;
+            }
+        }
+        if (distance1 < delta) {
+            if (p1.getAngle() < getClockwiseAngle(crossCheck2, p1, p2)) {
+                return false;
+            }
+        }
+
         return Math.abs(segmentLen - distance1 - distance2) < delta;
     }
 

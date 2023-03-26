@@ -46,11 +46,11 @@ public class PolygonService {
 
 //        System.out.println("----");
 //        for (Point point : polygon1.getPoints()) {
-//            System.out.println(point.getAngle());
+//            System.out.println(point.getAngle() * 180 / pi);
 //        }
 //        System.out.println("----");
 //        for (Point point : polygon2.getPoints()) {
-//            System.out.println(point.getAngle());
+//            System.out.println(point.getAngle() * 180 / pi);
 //        }
     }
 
@@ -66,23 +66,21 @@ public class PolygonService {
     private double getPolygonAnglesSum(Polygon polygon) {
         List<Point> points = polygon.getPoints();
         double sumAngle = 0.0;
-        double increment;
+        double angle;
         for (int i = 0; i < points.size(); i++) {
             Point p1 = points.get(0);
             Point p2 = points.get(1);
             Point p3 = points.get(2);
-            double angle = lineSegmentService.getClockwiseAngle(p1, p2, p3);
-            PointPosition pointPosition = lineSegmentService.getLineRelativePointPosition(p1, p2, p3);
-            if (pointPosition.equals(PointPosition.rightSide)) {
-                increment = pi - angle;
-            } else {
-                increment = pi + angle;
-            }
-            sumAngle += increment;
-            p2.setAngle(increment * 180 / pi);
+            angle = lineSegmentService.getClockwiseAngle(p1, p2, p3);
+            sumAngle += angle;
+            setVertexAngle(p2, angle);
             Collections.rotate(points, -1);
         }
         return sumAngle;
+    }
+
+    private void setVertexAngle(Point point, double angle) {
+        point.setAngle(angle);
     }
 
     private ContourDirection getContourDirection(Polygon polygon) {
