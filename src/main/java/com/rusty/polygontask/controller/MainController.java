@@ -85,14 +85,25 @@ public class MainController {
         j.addPoint(4.0, 4.0);
         j.addPoint(4.0, 0.0);
 
-        Polygon k = new Polygon();
-        k.addPoint(6.0, 0.0);
-        k.addPoint(4.0, 2.0);
-        k.addPoint(6.0, 4.0);
-        k.addPoint(8.0, 2.0);
+        Polygon k_in = new Polygon();
+        k_in.addPoint(1.5, 0.5);
+        k_in.addPoint(0.0, 2.0);
+        k_in.addPoint(1.5, 3.5);
+        k_in.addPoint(3.0, 2.0);
+
+        Polygon k_out = new Polygon();
+        k_out.addPoint(5.5, 0.5);
+        k_out.addPoint(4.0, 2.0);
+        k_out.addPoint(5.5, 3.5);
+        k_out.addPoint(7.0, 2.0);
+
+        Polygon k_top_right = new Polygon();
+        k_top_right.addPoint(5.5, 2.5);
+        k_top_right.addPoint(4.0, 4.0);
+        k_top_right.addPoint(5.5, 5.5);
+        k_top_right.addPoint(7.0, 4.0);
 
 
-
-        polygonService.calculateSquares(n, m);
+        polygonService.calculateSquares(j, k_top_right);
     }
 }

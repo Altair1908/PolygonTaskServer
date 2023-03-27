@@ -44,14 +44,14 @@ public class PolygonService {
         setClockwiseContourDirection(polygon1, polygon2);
         createPolygonsWithIntersectionPoints(polygon1, polygon2);
 
-//        System.out.println("----");
-//        for (Point point : polygon1.getPoints()) {
-//            System.out.println(point.getAngle() * 180 / pi);
-//        }
-//        System.out.println("----");
-//        for (Point point : polygon2.getPoints()) {
-//            System.out.println(point.getAngle() * 180 / pi);
-//        }
+        System.out.println("----");
+        for (Point point : polygon1.getPoints()) {
+            System.out.println(point.getAngle() * 180 / pi);
+        }
+        System.out.println("----");
+        for (Point point : polygon2.getPoints()) {
+            System.out.println(point.getAngle() * 180 / pi);
+        }
     }
 
     private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
@@ -113,6 +113,7 @@ public class PolygonService {
                     System.out.println(point);
                 });
             }
+
 //            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
 //            dupPolygon1.getPoints().addAll(dupPolygon1.getPoints().indexOf(points1.get(i)) + 1, sorted); // todo
         }
