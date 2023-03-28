@@ -104,6 +104,7 @@ public class MainController {
         k_top_right.addPoint(7.0, 4.0);
 
 
-        polygonService.calculateSquares(j, k_top_right);
+//        System.out.println(polygonService.getPolygonSquare(j));
+        polygonService.calculateSquares(r, h);
     }
 }

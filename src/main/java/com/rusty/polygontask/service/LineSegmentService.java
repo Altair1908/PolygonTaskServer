@@ -27,7 +27,7 @@ public class LineSegmentService {
         }
     }
 
-    public PointPosition getLineRelativePointPosition(Point lineFirstPoint, Point lineSecondPoint, Point point) {
+    private PointPosition getLineRelativePointPosition(Point lineFirstPoint, Point lineSecondPoint, Point point) {
         double k = (point.x - lineFirstPoint.x) * (lineSecondPoint.y - lineFirstPoint.y) -
                 (point.y - lineFirstPoint.y) * (lineSecondPoint.x - lineFirstPoint.x);
         if (k > 0) {
@@ -42,7 +42,7 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            if (isPointIncluded(p1, p2, point, null, null) && isPointIncluded(p3, p4, point, p1, p2)) {
+            if (isPointIncluded(p1, p2, point) && isPointIncluded(p3, p4, point)) {
                 point.setIntersectionPoint(true);
                 return Optional.of(point);
             }
@@ -50,22 +50,10 @@ public class LineSegmentService {
         return Optional.empty();
     }
 
-    private boolean isPointIncluded(Point start, Point end, Point point, Point crossCheck1, Point crossCheck2) {
+    private boolean isPointIncluded(Point start, Point end, Point point) {
         double distance1 = Math.sqrt(Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2));
         double distance2 = Math.sqrt(Math.pow(point.x - end.x, 2) + Math.pow(point.y - end.y, 2));
         double segmentLen = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-//        if (distance2 < delta) {
-//            double clockwiseAngle = getClockwiseAngle(start, end, crossCheck1);
-//            if (clockwiseAngle < pi && end.getAngle() < clockwiseAngle) {
-//                return false;
-//            }
-//        }
-//        if (distance1 < delta) {
-//            double clockwiseAngle = getClockwiseAngle(crossCheck2, start, end);
-//            if (clockwiseAngle < pi && start.getAngle() < clockwiseAngle) {
-//                return false;
-//            }
-//        }
         return Math.abs(segmentLen - distance1 - distance2) < delta;
     }
 

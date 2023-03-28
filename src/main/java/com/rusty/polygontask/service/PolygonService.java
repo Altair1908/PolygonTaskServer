@@ -2,7 +2,6 @@ package com.rusty.polygontask.service;
 
 import com.rusty.polygontask.enumeration.ContourDirection;
 import com.rusty.polygontask.model.Point;
-import com.rusty.polygontask.enumeration.PointPosition;
 import com.rusty.polygontask.model.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,16 +41,9 @@ public class PolygonService {
 
     public void calculateSquares(Polygon polygon1, Polygon polygon2) {
         setClockwiseContourDirection(polygon1, polygon2);
-        createPolygonsWithIntersectionPoints(polygon1, polygon2);
-
-        System.out.println("----");
-        for (Point point : polygon1.getPoints()) {
-            System.out.println(point.getAngle() * 180 / pi);
-        }
-        System.out.println("----");
-        for (Point point : polygon2.getPoints()) {
-            System.out.println(point.getAngle() * 180 / pi);
-        }
+        Polygon filledPolygon1 = createPolygonsWithIntersectionPoints(polygon1, polygon2);
+        Polygon filledPolygon2 = createPolygonsWithIntersectionPoints(polygon2, polygon1);
+        findIntersectionPolygons(filledPolygon1, filledPolygon2);
     }
 
     private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
@@ -93,11 +85,10 @@ public class PolygonService {
         }
     }
 
-    private void createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
+    private Polygon createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
         List<Point> points1 = polygon1.getPoints();
         List<Point> points2 = polygon2.getPoints();
-        Polygon dupPolygon1 = new Polygon(points1);
-        Polygon dupPolygon2 = new Polygon(points2);
+        Polygon filledPolygon = new Polygon(points1);
         int secondPointIndex1;
         int secondPointIndex2;
         List<Point> edgeIntersectionPoints = new ArrayList<>();
@@ -108,22 +99,12 @@ public class PolygonService {
                 secondPointIndex2 = t == points2.size() - 1 ? 0 : t + 1;
                 Optional<Point> intersectionPointOpt = lineSegmentService.getSegmentsIntersectionPoint(
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
-                intersectionPointOpt.ifPresent(point -> {
-//                    edgeIntersectionPoints::add
-                    System.out.println(point);
-                });
+                intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
-
-//            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
-//            dupPolygon1.getPoints().addAll(dupPolygon1.getPoints().indexOf(points1.get(i)) + 1, sorted); // todo
+            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
+            filledPolygon.getPoints().addAll(filledPolygon.getPoints().indexOf(points1.get(i)) + 1, sorted);
         }
-//        for (Point point : dupPolygon1.getPoints()) {
-//            if (point.isIntersectionPoint()) {
-//                System.out.println("--> " + point);
-//            } else {
-//                System.out.println(point);
-//            }
-//        }
+        return filledPolygon;
     }
 
     private List<Point> sortIntersectionPointsByBasePoint(List<Point> edgeIntersectionPoints, Point basePoint) {
@@ -138,6 +119,10 @@ public class PolygonService {
                 .sorted(Comparator.comparingDouble(Map.Entry::getKey))
                 .map(Map.Entry::getValue)
                 .toList();
+    }
+
+    private void findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
+
     }
 }
 
