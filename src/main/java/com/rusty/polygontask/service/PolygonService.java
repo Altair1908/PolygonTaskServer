@@ -142,7 +142,7 @@ public class PolygonService {
         Point cp = points.get(index);
         intersectionPolygon.addPoint(cp);
         while (true) {
-            index++;
+            index = (index == points.size() - 1) ? 0 : index + 1;
             cp = points.get(index);
             if (cp.isIntersectionPoint()) {
                 if (cp.equals(finishPoint)) {

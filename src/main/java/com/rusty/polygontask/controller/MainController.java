@@ -105,6 +105,6 @@ public class MainController {
 
 
 //        System.out.println(polygonService.getPolygonSquare(j));
-        polygonService.calculateSquares(r, h);
+        polygonService.calculateSquares(e, b);
     }
 }
