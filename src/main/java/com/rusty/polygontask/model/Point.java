@@ -2,12 +2,15 @@ package com.rusty.polygontask.model;
 
 import java.util.Objects;
 
+import static com.rusty.polygontask.constant.MathConstants.delta;
+
 public class Point {
 
     public final double x;
     public final double y;
     private boolean isIntersectionPoint = false;
     private double angle;
+    private boolean removeMark = false;
 
     public Point(double x, double y) {
         this.x = x;
@@ -28,6 +31,14 @@ public class Point {
 
     public void setAngle(double angle) {
         this.angle = angle;
+    }
+
+    public boolean isRemoveMarked() {
+        return removeMark;
+    }
+
+    public void setRemoveMark(boolean removeMark) {
+        this.removeMark = removeMark;
     }
 
     @Override

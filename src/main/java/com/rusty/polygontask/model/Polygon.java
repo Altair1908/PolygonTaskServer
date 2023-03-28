@@ -20,4 +20,8 @@ public class Polygon {
     public void addPoint(double x, double y) {
         points.add(new Point(x, y));
     }
+
+    public void addPoint(Point point) {
+        points.add(point);
+    }
 }

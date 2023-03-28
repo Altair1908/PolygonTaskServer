@@ -122,7 +122,75 @@ public class PolygonService {
     }
 
     private void findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
+        Polygon intersectionPolygon = new Polygon();
+        int i = nextIntersectionPointIndex(polygon1);
+        findNextPoint(polygon1, polygon2, 1, i, intersectionPolygon, polygon1.getPoints().get(i));
 
+        for (Point point : polygon1.getPoints()) {
+            if (point.isIntersectionPoint()) {
+                System.out.println("X " + point);
+            } else {
+                System.out.println(point);
+            }
+        }
+
+        removeMarked(polygon1);
+
+        System.out.println("--------------------------");
+
+        for (Point point : polygon1.getPoints()) {
+            if (point.isIntersectionPoint()) {
+                System.out.println("X " + point);
+            } else {
+                System.out.println(point);
+            }
+        }
+
+        System.out.println("--------------------------");
+
+        System.out.println(intersectionPolygon.getPoints());
+    }
+
+    private void findNextPoint(Polygon first, Polygon second, int polygon, int index, Polygon intersectionPolygon, Point finishPoint) {
+        List<Point> points = (polygon == 1) ? first.getPoints() : second.getPoints();
+        Point cp = points.get(index);
+        intersectionPolygon.addPoint(cp);
+        cp.setRemoveMark(true);
+        while (true) {
+            index++;
+            cp = points.get(index);
+            intersectionPolygon.addPoint(cp);
+            if (cp.isIntersectionPoint()) {
+                if (cp.equals(finishPoint)) {
+                    break;
+                }
+                polygon = (polygon == 1) ? 2 : 1;
+                points = (polygon == 1) ? first.getPoints() : second.getPoints();
+                int i = points.indexOf(cp);
+                findNextPoint(first, second, polygon, i, intersectionPolygon, finishPoint);
+                break;
+            }
+        }
+    }
+
+    private int nextIntersectionPointIndex(Polygon polygon) {
+        List<Point> points = polygon.getPoints();
+        for (int i = 0; i < points.size(); i++) {
+            if (points.get(i).isIntersectionPoint()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void removeMarked(Polygon polygon) {
+        List<Point> pointsToRemove = new ArrayList<>();
+        for (Point point : polygon.getPoints()) {
+            if (point.isRemoveMarked()) {
+                pointsToRemove.add(point);
+            }
+        }
+        polygon.getPoints().removeAll(pointsToRemove);
     }
 }
 
