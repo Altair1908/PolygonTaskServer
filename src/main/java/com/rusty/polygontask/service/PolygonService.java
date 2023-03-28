@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -122,44 +123,27 @@ public class PolygonService {
     }
 
     private void findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
-        Polygon intersectionPolygon = new Polygon();
-        int i = nextIntersectionPointIndex(polygon1);
-        findNextPoint(polygon1, polygon2, 1, i, intersectionPolygon, polygon1.getPoints().get(i));
-
-        for (Point point : polygon1.getPoints()) {
-            if (point.isIntersectionPoint()) {
-                System.out.println("X " + point);
-            } else {
-                System.out.println(point);
-            }
+        Polygon intersectionPolygon;
+        while (true) {
+            intersectionPolygon = new Polygon();
+            int i = nextIntersectionPointIndex(polygon1);
+            if (i == -1) break;
+            findNextPoint(polygon1, polygon2, 1, i, intersectionPolygon, polygon1.getPoints().get(i));
+            Collection<Point> pointsToRemove = getIntersectionPointsFromIntersectionPolygon(intersectionPolygon);
+            polygon1.getPoints().removeAll(pointsToRemove);
+            polygon2.getPoints().removeAll(pointsToRemove);
+            System.out.println(intersectionPolygon.getPoints());
         }
-
-        removeMarked(polygon1);
-
-        System.out.println("--------------------------");
-
-        for (Point point : polygon1.getPoints()) {
-            if (point.isIntersectionPoint()) {
-                System.out.println("X " + point);
-            } else {
-                System.out.println(point);
-            }
-        }
-
-        System.out.println("--------------------------");
-
-        System.out.println(intersectionPolygon.getPoints());
     }
 
-    private void findNextPoint(Polygon first, Polygon second, int polygon, int index, Polygon intersectionPolygon, Point finishPoint) {
+    private void findNextPoint(Polygon first, Polygon second, int polygon, int index, Polygon intersectionPolygon,
+                               Point finishPoint) {
         List<Point> points = (polygon == 1) ? first.getPoints() : second.getPoints();
         Point cp = points.get(index);
         intersectionPolygon.addPoint(cp);
-        cp.setRemoveMark(true);
         while (true) {
             index++;
             cp = points.get(index);
-            intersectionPolygon.addPoint(cp);
             if (cp.isIntersectionPoint()) {
                 if (cp.equals(finishPoint)) {
                     break;
@@ -169,6 +153,8 @@ public class PolygonService {
                 int i = points.indexOf(cp);
                 findNextPoint(first, second, polygon, i, intersectionPolygon, finishPoint);
                 break;
+            } else {
+                intersectionPolygon.addPoint(cp);
             }
         }
     }
@@ -183,14 +169,14 @@ public class PolygonService {
         return -1;
     }
 
-    private void removeMarked(Polygon polygon) {
+    private Collection<Point> getIntersectionPointsFromIntersectionPolygon(Polygon polygon) {
         List<Point> pointsToRemove = new ArrayList<>();
         for (Point point : polygon.getPoints()) {
-            if (point.isRemoveMarked()) {
+            if (point.isIntersectionPoint()) {
                 pointsToRemove.add(point);
             }
         }
-        polygon.getPoints().removeAll(pointsToRemove);
+        return pointsToRemove;
     }
 }
 

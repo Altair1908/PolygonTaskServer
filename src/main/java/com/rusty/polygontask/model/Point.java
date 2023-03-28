@@ -1,8 +1,8 @@
 package com.rusty.polygontask.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
-
-import static com.rusty.polygontask.constant.MathConstants.delta;
 
 public class Point {
 
@@ -10,11 +10,12 @@ public class Point {
     public final double y;
     private boolean isIntersectionPoint = false;
     private double angle;
-    private boolean removeMark = false;
 
     public Point(double x, double y) {
-        this.x = x;
-        this.y = y;
+        BigDecimal bdX = new BigDecimal(x);
+        BigDecimal bdY = new BigDecimal(y);
+        this.x = bdX.setScale(6, RoundingMode.HALF_UP).doubleValue();
+        this.y = bdY.setScale(6, RoundingMode.HALF_UP).doubleValue();
     }
 
     public boolean isIntersectionPoint() {
@@ -31,14 +32,6 @@ public class Point {
 
     public void setAngle(double angle) {
         this.angle = angle;
-    }
-
-    public boolean isRemoveMarked() {
-        return removeMark;
-    }
-
-    public void setRemoveMark(boolean removeMark) {
-        this.removeMark = removeMark;
     }
 
     @Override
