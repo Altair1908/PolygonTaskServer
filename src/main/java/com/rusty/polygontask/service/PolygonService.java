@@ -42,8 +42,10 @@ public class PolygonService {
 
     public void calculateSquares(Polygon polygon1, Polygon polygon2) {
         setClockwiseContourDirection(polygon1, polygon2);
+
         Polygon filledPolygon1 = createPolygonsWithIntersectionPoints(polygon1, polygon2);
         Polygon filledPolygon2 = createPolygonsWithIntersectionPoints(polygon2, polygon1);
+
         findIntersectionPolygons(filledPolygon1, filledPolygon2);
     }
 
@@ -102,24 +104,26 @@ public class PolygonService {
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
                 intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
-            List<Point> sorted = sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
-            filledPolygon.getPoints().addAll(filledPolygon.getPoints().indexOf(points1.get(i)) + 1, sorted);
+            sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
+            int insertIndex = filledPolygon.getPoints().indexOf(points1.get(i)) + 1;
+            filledPolygon.getPoints().addAll(insertIndex, edgeIntersectionPoints);
         }
         return filledPolygon;
     }
 
-    private List<Point> sortIntersectionPointsByBasePoint(List<Point> edgeIntersectionPoints, Point basePoint) {
-        Map<Double, Point> distances = new HashMap<>();
-        double distance;
-
-        for (Point point : edgeIntersectionPoints) {
-            distance = Math.sqrt(Math.pow(basePoint.x - point.x, 2) + Math.pow(basePoint.y - point.y, 2));
-            distances.put(distance, point);
-        }
-        return distances.entrySet().stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getKey))
-                .map(Map.Entry::getValue)
-                .toList();
+    private void sortIntersectionPointsByBasePoint(List<Point> edgeIntersectionPoints, Point basePoint) {
+        edgeIntersectionPoints.sort((point1, point2) -> {
+            double distance1 = Math.sqrt(Math.pow(basePoint.x - point1.x, 2) + Math.pow(basePoint.y - point1.y, 2));
+            double distance2 = Math.sqrt(Math.pow(basePoint.x - point2.x, 2) + Math.pow(basePoint.y - point2.y, 2));
+            if (Math.abs(distance1 - distance2) < delta) {
+                return 0;
+            } else if (distance1 > distance2) {
+                return 1;
+            } else if (distance1 < distance2) {
+                return -1;
+            }
+            throw new RuntimeException();
+        });
     }
 
     private void findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
