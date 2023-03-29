@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.rusty.polygontask.constant.MathConstants.delta;
@@ -43,10 +40,45 @@ public class PolygonService {
     public void calculateSquares(Polygon polygon1, Polygon polygon2) {
         setClockwiseContourDirection(polygon1, polygon2);
 
-        Polygon filledPolygon1 = createPolygonsWithIntersectionPoints(polygon1, polygon2);
-        Polygon filledPolygon2 = createPolygonsWithIntersectionPoints(polygon2, polygon1);
+        Polygon filledPolygon1 = createPolygonWithIntersectionPoints(polygon1, polygon2);
+
+        List<Point> allIntersectionPoints = collectAllIntersectionPoints(filledPolygon1);
+
+        Polygon filledPolygon2 = fillSecondPolygonWithIntersectionPoints(polygon2, allIntersectionPoints);
+
+        // todo clear duplicates
 
         findIntersectionPolygons(filledPolygon1, filledPolygon2);
+    }
+
+    private List<Point> collectAllIntersectionPoints(Polygon filledPolygon) {
+        List<Point> allIntersectionPoints = new ArrayList<>();
+        for (Point point : filledPolygon.getPoints()) {
+            if (point.isIntersectionPoint()) {
+                allIntersectionPoints.add(point);
+            }
+        }
+        return allIntersectionPoints;
+    }
+
+    private Polygon fillSecondPolygonWithIntersectionPoints(Polygon secondPolygon, List<Point> allIntersectionPoints) {
+        Polygon filledPolygon = new Polygon(secondPolygon.getPoints());
+        List<Point> edgeIntersectionPoints = new ArrayList<>();
+        List<Point> points = secondPolygon.getPoints();
+        for (int i = 0; i < points.size(); i++) {
+            edgeIntersectionPoints.clear();
+            for (Point point : allIntersectionPoints) {
+                if (point.getStartPointIndex() == i) {
+                    edgeIntersectionPoints.add(point);
+                }
+            }
+            if (!edgeIntersectionPoints.isEmpty()) {
+                sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points.get(i));
+                int insertIndex = filledPolygon.getPoints().indexOf(points.get(i)) + 1;
+                filledPolygon.getPoints().addAll(insertIndex, edgeIntersectionPoints);
+            }
+        }
+        return filledPolygon;
     }
 
     private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
@@ -88,7 +120,7 @@ public class PolygonService {
         }
     }
 
-    private Polygon createPolygonsWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
+    private Polygon createPolygonWithIntersectionPoints(Polygon polygon1, Polygon polygon2) {
         List<Point> points1 = polygon1.getPoints();
         List<Point> points2 = polygon2.getPoints();
         Polygon filledPolygon = new Polygon(points1);
@@ -102,7 +134,11 @@ public class PolygonService {
                 secondPointIndex2 = t == points2.size() - 1 ? 0 : t + 1;
                 Optional<Point> intersectionPointOpt = lineSegmentService.getSegmentsIntersectionPoint(
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
-                intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
+                int finalT = t;
+                intersectionPointOpt.ifPresent(point -> {
+                    point.setStartPointIndex(finalT);
+                    edgeIntersectionPoints.add(point);
+                });
             }
             sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
             int insertIndex = filledPolygon.getPoints().indexOf(points1.get(i)) + 1;
@@ -137,6 +173,7 @@ public class PolygonService {
             polygon1.getPoints().removeAll(pointsToRemove);
             polygon2.getPoints().removeAll(pointsToRemove);
             System.out.println(intersectionPolygon.getPoints());
+            System.out.println(getPolygonSquare(intersectionPolygon));
         }
     }
 
