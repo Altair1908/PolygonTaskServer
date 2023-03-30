@@ -42,7 +42,7 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            if (isPointIncluded(p1, p2, point) && isPointIncluded(p3, p4, point)) {
+            if (isPointIncludedInEdges(p1, p2, point) && isPointIncludedInEdges(p3, p4, point)) {
                 point.setIntersectionPoint(true);
                 return Optional.of(point);
             }
@@ -50,7 +50,7 @@ public class LineSegmentService {
         return Optional.empty();
     }
 
-    private boolean isPointIncluded(Point start, Point end, Point point) {
+    private boolean isPointIncludedInEdges(Point start, Point end, Point point) {
         double distance1 = Math.sqrt(Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2));
         double distance2 = Math.sqrt(Math.pow(point.x - end.x, 2) + Math.pow(point.y - end.y, 2));
         double segmentLen = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));

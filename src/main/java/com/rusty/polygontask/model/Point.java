@@ -11,7 +11,7 @@ public class Point {
     public final double x;
     public final double y;
     private boolean isIntersectionPoint = false;
-    private int startPointIndex;
+    private int basePointIndex;
     private double angle;
 
     public Point(double x, double y) {
@@ -38,12 +38,12 @@ public class Point {
         this.angle = angle;
     }
 
-    public int getStartPointIndex() {
-        return startPointIndex;
+    public int getBasePointIndex() {
+        return basePointIndex;
     }
 
-    public void setStartPointIndex(int startPointIndex) {
-        this.startPointIndex = startPointIndex;
+    public void setBasePointIndex(int basePointIndex) {
+        this.basePointIndex = basePointIndex;
     }
 
     public UUID getId() {
