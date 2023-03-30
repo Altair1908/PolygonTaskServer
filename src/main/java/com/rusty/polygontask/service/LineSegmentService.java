@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.rusty.polygontask.constant.MathConstants.delta;
-import static com.rusty.polygontask.constant.MathConstants.pi;
+import static com.rusty.polygontask.constant.Constants.delta;
+import static com.rusty.polygontask.constant.Constants.pi;
 
 @Service
 public class LineSegmentService {

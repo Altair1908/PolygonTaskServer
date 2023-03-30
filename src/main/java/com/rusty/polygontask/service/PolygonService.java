@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.rusty.polygontask.constant.MathConstants.delta;
-import static com.rusty.polygontask.constant.MathConstants.pi;
+import static com.rusty.polygontask.constant.Constants.delta;
+import static com.rusty.polygontask.constant.Constants.pi;
 
 @Service
 public class PolygonService {
@@ -46,6 +46,23 @@ public class PolygonService {
 
         Polygon filledPolygon2 = fillSecondPolygonWithIntersectionPoints(polygon2, allIntersectionPoints);
 
+        System.out.println("--------------------------");
+        for (Point point : filledPolygon1.getPoints()) {
+            if (point.isIntersectionPoint()) {
+                System.out.println("X " + point + " " + point.getId());
+            } else {
+                System.out.println(point + " " + point.getId());
+            }
+        }
+        System.out.println("--------------------------");
+        for (Point point : filledPolygon2.getPoints()) {
+            if (point.isIntersectionPoint()) {
+                System.out.println("X " + point + " " + point.getId());
+            } else {
+                System.out.println(point + " " + point.getId());
+            }
+        }
+        System.out.println("--------------------------");
         // todo clear duplicates
 
         findIntersectionPolygons(filledPolygon1, filledPolygon2);
@@ -172,6 +189,25 @@ public class PolygonService {
             Collection<Point> pointsToRemove = getIntersectionPointsFromIntersectionPolygon(intersectionPolygon);
             polygon1.getPoints().removeAll(pointsToRemove);
             polygon2.getPoints().removeAll(pointsToRemove);
+
+            System.out.println("--------------------------");
+            for (Point point : polygon1.getPoints()) {
+                if (point.isIntersectionPoint()) {
+                    System.out.println("X " + point + " " + point.getId());
+                } else {
+                    System.out.println(point + " " + point.getId());
+                }
+            }
+            System.out.println("--------------------------");
+            for (Point point : polygon2.getPoints()) {
+                if (point.isIntersectionPoint()) {
+                    System.out.println("X " + point + " " + point.getId());
+                } else {
+                    System.out.println(point + " " + point.getId());
+                }
+            }
+            System.out.println("--------------------------");
+
             System.out.println(intersectionPolygon.getPoints());
             System.out.println(getPolygonSquare(intersectionPolygon));
         }

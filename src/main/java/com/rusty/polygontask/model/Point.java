@@ -46,6 +46,10 @@ public class Point {
         this.startPointIndex = startPointIndex;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
