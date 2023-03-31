@@ -53,9 +53,7 @@ public class PolygonService {
         }
         System.out.println("--------------------------");
 
-        findIntersectionPolygons(filledPolygon1, filledPolygon2);
-
-        return 0;
+        return findIntersectionPolygons(filledPolygon1, filledPolygon2);
     }
 
     private void setClockwiseContourDirection(Polygon polygon1, Polygon polygon2) {
@@ -139,8 +137,10 @@ public class PolygonService {
         });
     }
 
-    private void findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
+    private int findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
         Polygon intersectionPolygon;
+        int count = 0;
+
         while (true) {
             intersectionPolygon = new Polygon();
             int i = nextIntersectionPointIndex(polygon1);
@@ -150,6 +150,8 @@ public class PolygonService {
             int ind = polygon2.getPoints().indexOf(cp);
             findNextPoint(polygon1, polygon2, 2, ind, intersectionPolygon, polygon1.getPoints().get(i));
             handleUsedPoints(polygon1);
+
+            count++;
 
             for (Point point : intersectionPolygon.getPoints()) {
                 System.out.println(point);
@@ -165,6 +167,8 @@ public class PolygonService {
             }
             System.out.println("--------------------------");
         }
+
+        return count;
     }
 
     private void findNextPoint(Polygon first, Polygon second, int polygon, int index, Polygon intersectionPolygon,
