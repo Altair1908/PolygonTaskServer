@@ -110,6 +110,16 @@ public class MainController {
         p3.addPoint(1.0, 2.0);
         p3.addPoint(3.0, 2.0);
 
+        Polygon o4 = new Polygon();
+        o4.addPoint(0.0, 0.0);
+        o4.addPoint(2.0, 3.0);
+        o4.addPoint(4.0, 0.0);
+
+        Polygon p4 = new Polygon();
+        p4.addPoint(2.0, 3.0);
+        p4.addPoint(2.0, 5.0);
+        p4.addPoint(4.0, 5.0);
+
 
 
         Polygon j = new Polygon();
@@ -139,10 +149,12 @@ public class MainController {
 
 //        System.out.println(polygonService.getPolygonSquare(j));
 //        polygonService.calculateSquares(e, b);
-//        polygonService.calculateSquares(r, h);
+        polygonService.calculateSquares(r, h);
+//        polygonService.calculateSquares(n, m);
 //        polygonService.calculateSquares(o1, p1);
 //        polygonService.calculateSquares(o2, p2);
-        polygonService.calculateSquares(o3, p3);
+//        polygonService.calculateSquares(o3, p3);
+//        polygonService.calculateSquares(o4, p4);
 //        polygonService.calculateSquares(j, k_in);
 //        polygonService.calculateSquares(j, k_out);
     }

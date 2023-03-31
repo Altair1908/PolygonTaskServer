@@ -1,5 +1,6 @@
 package com.rusty.polygontask.service;
 
+import com.rusty.polygontask.enumeration.EdgePoint;
 import com.rusty.polygontask.model.Point;
 import com.rusty.polygontask.enumeration.PointPosition;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class LineSegmentService {
         double pTwoThreeVectorLength = Math.sqrt(Math.pow(np3.x, 2) + Math.pow(np3.y, 2));
         double angle = Math.acos(numerator / (pOneTwoVectorLength * pTwoThreeVectorLength));
         PointPosition pointPosition = getLineRelativePointPosition(p1, p2, p3);
+
         if (pointPosition.equals(PointPosition.rightSide)) {
             return pi - angle;
         } else {
@@ -30,6 +32,7 @@ public class LineSegmentService {
     private PointPosition getLineRelativePointPosition(Point lineFirstPoint, Point lineSecondPoint, Point point) {
         double k = (point.x - lineFirstPoint.x) * (lineSecondPoint.y - lineFirstPoint.y) -
                 (point.y - lineFirstPoint.y) * (lineSecondPoint.x - lineFirstPoint.x);
+
         if (k > 0) {
             return PointPosition.rightSide;
         } else if (k < 0) {
@@ -42,19 +45,40 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            if (isPointIncludedInEdges(p1, p2, point) && isPointIncludedInEdges(p3, p4, point)) {
-                point.setIntersectionPoint(true);
-                return Optional.of(point);
+            EdgePoint ep12 = isPointIncludedInEdge(p1, p2, point);
+            EdgePoint ep34 = isPointIncludedInEdge(p3, p4, point);
+
+            if (ep34.equals(EdgePoint.body) || ep34.equals(EdgePoint.end)) {
+                if (ep12.equals(EdgePoint.body)) {
+                    point.setIntersectionPoint(true);
+                    point.setEdgePoint(EdgePoint.body);
+                    return Optional.of(point);
+                }
+                if (ep12.equals(EdgePoint.end)) {
+                    p2.setEdgePoint(EdgePoint.end);
+                    return Optional.empty();
+                }
             }
         }
         return Optional.empty();
     }
 
-    private boolean isPointIncludedInEdges(Point start, Point end, Point point) {
+    private EdgePoint isPointIncludedInEdge(Point start, Point end, Point point) {
         double distance1 = Math.sqrt(Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2));
         double distance2 = Math.sqrt(Math.pow(point.x - end.x, 2) + Math.pow(point.y - end.y, 2));
         double segmentLen = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-        return Math.abs(segmentLen - distance1 - distance2) < delta;
+
+        if (Math.abs(segmentLen - distance1 - distance2) < delta) {
+            if (distance2 < delta) {
+                return EdgePoint.end;
+            }
+            if (distance1 < delta) {
+                return EdgePoint.start;
+            }
+            return EdgePoint.body;
+        } else {
+            return EdgePoint.none;
+        }
     }
 
     private Optional<Point> getLinesIntersectionPoint(Point p1, Point p2, Point p3, Point p4) {
