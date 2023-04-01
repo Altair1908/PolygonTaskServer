@@ -1,7 +1,7 @@
 package com.rusty.polygontask.service;
 
 import com.rusty.polygontask.enumeration.ContourDirection;
-import com.rusty.polygontask.enumeration.EdgePoint;
+import com.rusty.polygontask.enumeration.IntersectionType;
 import com.rusty.polygontask.model.Point;
 import com.rusty.polygontask.model.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,11 +109,7 @@ public class PolygonService {
                 secondPointIndex2 = t == points2.size() - 1 ? 0 : t + 1;
                 Optional<Point> intersectionPointOpt = lineSegmentService.getSegmentsIntersectionPoint(
                         points1.get(i), points1.get(secondPointIndex1), points2.get(t), points2.get(secondPointIndex2));
-                int finalT = t;
-                intersectionPointOpt.ifPresent(point -> {
-                    point.setBasePointIndex(finalT);
-                    edgeIntersectionPoints.add(point);
-                });
+                intersectionPointOpt.ifPresent(edgeIntersectionPoints::add);
             }
             sortIntersectionPointsByBasePoint(edgeIntersectionPoints, points1.get(i));
             int insertIndex = filledPolygon.getPoints().indexOf(points1.get(i)) + 1;
@@ -138,19 +134,17 @@ public class PolygonService {
     }
 
     private int findIntersectionPolygons(Polygon polygon1, Polygon polygon2) {
-        Polygon intersectionPolygon;
         int count = 0;
+        Polygon intersectionPolygon;
 
         while (true) {
             intersectionPolygon = new Polygon();
             int i = nextIntersectionPointIndex(polygon1);
             if (i == -1) break;
             Point cp = polygon1.getPoints().get(i);
-            cp.setDeletionMark(true);
             int ind = polygon2.getPoints().indexOf(cp);
             findNextPoint(polygon1, polygon2, 2, ind, intersectionPolygon, polygon1.getPoints().get(i));
-            handleUsedPoints(polygon1);
-
+            handleUsedPoints(intersectionPolygon, polygon1, polygon2);
             count++;
 
             for (Point point : intersectionPolygon.getPoints()) {
@@ -176,11 +170,11 @@ public class PolygonService {
         List<Point> points = (polygon == 1) ? first.getPoints() : second.getPoints();
         Point cp = points.get(index);
         intersectionPolygon.addPoint(cp);
-        cp.setDeletionMark(true);
         while (true) {
             index = (index == 0) ? points.size() - 1 : index - 1;
             cp = points.get(index);
-            if (cp.isIntersectionPoint() || cp.getEdgePoint().equals(EdgePoint.end)) {
+            if (cp.getIntersectionType().equals(IntersectionType.body) ||
+                    cp.getIntersectionType().equals(IntersectionType.end)) {
                 if (cp.equals(finishPoint)) {
                     break;
                 }
@@ -191,7 +185,6 @@ public class PolygonService {
                 break;
             } else {
                 intersectionPolygon.addPoint(cp);
-                cp.setDeletionMark(true);
             }
         }
     }
@@ -200,25 +193,31 @@ public class PolygonService {
         List<Point> points = polygon.getPoints();
         for (int i = 0; i < points.size(); i++) {
             Point currentPoint = points.get(i);
-            if (currentPoint.isIntersectionPoint() || currentPoint.getEdgePoint().equals(EdgePoint.end)) {
+            if (currentPoint.getIntersectionType().equals(IntersectionType.body) ||
+                    currentPoint.getIntersectionType().equals(IntersectionType.end)) {
                 return i;
             }
         }
         return -1;
     }
 
-    private void handleUsedPoints(Polygon polygon) {
-        List<Point> pointsForDeletion = new ArrayList<>();
-        for (Point point : polygon.getPoints()) {
-            if (point.isDeletionMark()) {
-                if (point.isIntersectionPoint()) {
-                    pointsForDeletion.add(point);
-                } else if (point.getEdgePoint().equals(EdgePoint.end)) {
-                    point.setEdgePoint(EdgePoint.none);
+    private void handleUsedPoints(Polygon intersectionPolygon, Polygon polygon1, Polygon polygon2) {
+        List<Point> intersectionPoints = intersectionPolygon.getPoints();
+        List<Point> polygon1Points = polygon1.getPoints();
+        List<Point> polygon2Points = polygon2.getPoints();
+
+        for (Point point : intersectionPoints) {
+            for (Point polygon1Point : polygon1Points) {
+                if (polygon1Point.equals(point)) {
+                    polygon1Point.setIntersectionType(IntersectionType.none);
+                }
+            }
+            for (Point polygon2Point : polygon2Points) {
+                if (polygon2Point.equals(point)) {
+                    polygon2Point.setIntersectionType(IntersectionType.none);
                 }
             }
         }
-        polygon.getPoints().removeAll(pointsForDeletion);
     }
 }
 

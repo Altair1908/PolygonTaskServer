@@ -1,6 +1,6 @@
 package com.rusty.polygontask.enumeration;
 
-public enum EdgePoint {
+public enum IntersectionType {
 
     start,
     body,

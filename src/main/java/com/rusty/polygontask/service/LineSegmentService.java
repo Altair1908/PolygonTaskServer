@@ -1,6 +1,6 @@
 package com.rusty.polygontask.service;
 
-import com.rusty.polygontask.enumeration.EdgePoint;
+import com.rusty.polygontask.enumeration.IntersectionType;
 import com.rusty.polygontask.model.Point;
 import com.rusty.polygontask.enumeration.PointPosition;
 import org.springframework.stereotype.Service;
@@ -45,17 +45,17 @@ public class LineSegmentService {
         Optional<Point> linesIntersectionPointOpt = getLinesIntersectionPoint(p1, p2, p3, p4);
         if (linesIntersectionPointOpt.isPresent()) {
             Point point = linesIntersectionPointOpt.get();
-            EdgePoint ep12 = isPointIncludedInEdge(p1, p2, point);
-            EdgePoint ep34 = isPointIncludedInEdge(p3, p4, point);
+            IntersectionType ep12 = isPointIncludedInEdge(p1, p2, point);
+            IntersectionType ep34 = isPointIncludedInEdge(p3, p4, point);
 
-            if (ep34.equals(EdgePoint.body) || ep34.equals(EdgePoint.end)) {
-                if (ep12.equals(EdgePoint.body)) {
-                    point.setIntersectionPoint(true);
-                    point.setEdgePoint(EdgePoint.body);
+            if (ep34.equals(IntersectionType.body) || ep34.equals(IntersectionType.end)) {
+                if (ep12.equals(IntersectionType.body)) {
+                    point.setIntersectionType(IntersectionType.body);
                     return Optional.of(point);
                 }
-                if (ep12.equals(EdgePoint.end)) {
-                    p2.setEdgePoint(EdgePoint.end);
+                if (ep12.equals(IntersectionType.end)) {
+                    p2.setIntersectionType(IntersectionType.end);
+                    // todo
                     return Optional.empty();
                 }
             }
@@ -63,21 +63,21 @@ public class LineSegmentService {
         return Optional.empty();
     }
 
-    private EdgePoint isPointIncludedInEdge(Point start, Point end, Point point) {
+    private IntersectionType isPointIncludedInEdge(Point start, Point end, Point point) {
         double distance1 = Math.sqrt(Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2));
         double distance2 = Math.sqrt(Math.pow(point.x - end.x, 2) + Math.pow(point.y - end.y, 2));
         double segmentLen = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
 
         if (Math.abs(segmentLen - distance1 - distance2) < delta) {
             if (distance2 < delta) {
-                return EdgePoint.end;
+                return IntersectionType.end;
             }
             if (distance1 < delta) {
-                return EdgePoint.start;
+                return IntersectionType.start;
             }
-            return EdgePoint.body;
+            return IntersectionType.body;
         } else {
-            return EdgePoint.none;
+            return IntersectionType.none;
         }
     }
 
